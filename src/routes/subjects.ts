@@ -8,10 +8,15 @@ const router = express.Router();
 // get all subjects with optional search, filtering and pagination
 router.get("/", async(req, res)=>{
     try{
-        const {search, department, page = 1, limit = 10} = req.query;
+        const { search, department, page = "1", limit = "10" } = req.query;
 
-        const currentPage = Math.max(1,+page);
-        const limitPerPage = Math.max(1,+limit);
+        const parsePositiveInt = (value: unknown, fallback: number) => {
+            const n = Number.parseInt(String(value), 10);
+            return Number.isFinite(n) && n > 0 ? n : fallback;
+        };
+
+        const currentPage = parsePositiveInt(page, 1);
+        const limitPerPage = Math.min(parsePositiveInt(limit, 10), 100);
 
         const offset = (currentPage - 1) * limitPerPage;
         const filterConditions = [];
